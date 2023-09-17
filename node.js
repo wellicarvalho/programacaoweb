@@ -1,83 +1,86 @@
-// Saldo inicial da conta
-let saldo = 1000; // Você pode definir o saldo inicial desejado
-
-// Array para armazenar o histórico de transações
-const historicoTransacoes = [];
-
-// Função para exibir o menu e obter a escolha do usuário
-function exibirMenu() {
-  console.log("Bem-vindo ao Sistema de Conta Bancária! Escolha uma opção:");
-  console.log("1. Depositar");
-  console.log("2. Sacar");
-  console.log("3. Ver Saldo");
-  console.log("4. Ver Histórico de Transações");
-  console.log("5. Sair");
-  
-  const escolha = parseInt(prompt("Digite o número da opção desejada:"));
-  
-  switch (escolha) {
-    case 1:
-      depositar();
-      break;
-    
-   
-case 2:
-      sacar();
-      break;
-    case 3:
-      verSaldo();
-      break;
-    case 4:
-      verHistorico();
-      break;
-    case 5:
-      console.log("Obrigado por usar nosso sistema. Adeus!");
-      return;
-    default:
-      console.log("Opção inválida. Tente novamente.");
+class ContaBancaria {
+  constructor(agencia, numero, tipo, saldo) {
+    this.agencia = agencia;
+    this.numero = numero;
+    this.tipo = tipo;
+    this._saldo = saldo;
   }
-  
-  exibirMenu(); // Chama o menu novamente para permitir mais ações
-}
 
-// Função para realizar um depósito
-function depositar() {
-  const valor = parseFloat(prompt("Digite o valor a ser depositado:"));
-  if (isNaN(valor) || valor <= 0) {
-    console.log("Valor inválido. Tente novamente.");
-    return;
+  get saldo() {
+    return this._saldo;
   }
-  
-  saldo += valor;
-  historicoTransacoes.push({ tipo: "Depósito", valor, data: new Date() });
-  console.log(`Depósito de $${valor.toFixed(2)} realizado com sucesso.`);
-}
 
-// Função para realizar um saque
-function sacar() {
-  const valor = parseFloat(prompt("Digite o valor a ser sacado:"));
-  if (isNaN(valor) || valor <= 0 || valor > saldo) {
-    console.log("Valor inválido ou saldo insuficiente. Tente novamente.");
-    return;
+  set saldo(novoSaldo) {
+    this._saldo = novoSaldo;
   }
-  
-  saldo -= valor;
-  historicoTransacoes.push({ tipo: "Saque", valor, data: new Date() });
-  console.log(`Saque de $${valor.toFixed(2)} realizado com sucesso.`);
-}
 
-// Função para verificar o saldo atual
-function verSaldo() {
-  console.log(`Saldo atual: $${saldo.toFixed(2)}`);
-}
+  depositar(valor) {
+    if (valor > 0) {
+      this._saldo += valor;
+      console.log(`Depósito de R$${valor} realizado. Novo saldo: R$${this._saldo}`);
+    } else {
+      console.log("Valor de depósito inválido.");
+    }
+  }
 
-// Função para exibir o histórico de transações
-function verHistorico() {
-  console.log("Histórico de Transações:");
-  for (const transacao of historicoTransacoes) {
-    console.log(`${transacao.tipo}: $${transacao.valor.toFixed(2)} em ${transacao.data.toLocaleString()}`);
+  sacar(valor) {
+    if (valor > 0 && valor <= this._saldo) {
+      this._saldo -= valor;
+      console.log(`Saque de R$${valor} realizado. Novo saldo: R$${this._saldo}`);
+    } else {
+      console.log("Saque não autorizado. Saldo insuficiente ou valor inválido.");
+    }
   }
 }
 
-// Iniciar o programa exibindo o menu
-exibirMenu();
+class ContaCorrente extends ContaBancaria {
+  constructor(agencia, numero, saldo, cartaoCredito) {
+    super(agencia, numero, "Conta Corrente", saldo);
+    this.cartaoCredito = cartaoCredito;
+  }
+
+  get cartaoCredito() {
+    return this._cartaoCredito;
+  }
+
+  set cartaoCredito(novoCartaoCredito) {
+    this._cartaoCredito = novoCartaoCredito;
+  }
+}
+
+class ContaPoupanca extends ContaBancaria {
+  constructor(agencia, numero, saldo) {
+    super(agencia, numero, "Conta Poupança", saldo);
+  }
+}
+
+class ContaUniversitaria extends ContaBancaria {
+  constructor(agencia, numero, saldo) {
+    super(agencia, numero, "Conta Universitária", saldo);
+  }
+
+  sacar(valor) {
+    if (valor > 0 && valor <= 500 && valor <= this._saldo) {
+      this._saldo -= valor;
+      console.log(`Saque de R$${valor} realizado. Novo saldo: R$${this._saldo}`);
+    } else {
+      console.log("Saque não autorizado. Saldo insuficiente, valor inválido ou acima do limite de R$500.");
+    }
+  }
+}
+
+// Exemplo de uso das classes
+const contaCorrente = new ContaCorrente("001", "12345", 1000, 1000);
+contaCorrente.depositar(500);
+contaCorrente.sacar(300);
+console.log("Saldo Conta Corrente:", contaCorrente.saldo);
+
+const contaPoupanca = new ContaPoupanca("002", "54321", 5000);
+contaPoupanca.depositar(1000);
+contaPoupanca.sacar(2000);
+console.log("Saldo Conta Poupança:", contaPoupanca.saldo);
+
+const contaUniversitaria = new ContaUniversitaria("003", "67890", 800, 500);
+contaUniversitaria.depositar(300);
+contaUniversitaria.sacar(700);
+console.log("Saldo Conta Universitária:", contaUniversitaria.saldo);
